@@ -1,0 +1,27 @@
+{
+  "name": "serverapp",
+  "version": "1.0.0",
+  "description": "User Api",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nehasharma0708/ServerApp.git"
+  },
+  "keywords": [
+    "npm"
+  ],
+  "author": "Neha Sharma",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nehasharma0708/ServerApp/issues"
+  },
+  "homepage": "https://github.com/nehasharma0708/ServerApp#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "mongodb": "^3.1.8"
+  }
+}
