@@ -25,15 +25,30 @@ app.use(function(req, res, next) {  // Enable cross origin resource sharing (for
     }
 });
 
-app.get("/user", (request, response) => {
-  response.send("<h1>Hello User!</h1>")
+app.get("/user", (req, res, next) => {
+  let result = "";
+  mongo.connect(url, { useNewUrlParser: true }, (err, client) => {
+    assert.equal(null, err);
+    let db = client.db(dbName);
+    let cursor = db.collection('user-data').find({}, {limit: 1}).sort({$natural: -1});
+    cursor.forEach((doc, err) => {
+      assert.equal(null, err);
+      result = doc;
+    }, () => {
+          client.close();
+          console.log(result);
+          res.json({message: result});
+    });
+  });
 });
 
 app.post('/user', (req, res, next) => {
   var body = req.body;
   var item = {
     username : body.name,
-    date : new Date()
+    date : new Date(),
+    email : body.email,
+    phone : body.phone
   };
   saveToDataBase(item);
   console.log('user', body.name);  
