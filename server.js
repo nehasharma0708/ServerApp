@@ -2,11 +2,24 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongo  = require('mongodb').MongoClient;
 const assert = require("assert");
+const fs = require('fs'); 
+const https = require('https'); 
+const http = require('http'); 
+
+const key = fs.readFileSync('./certificates/key.pem');
+const cert = fs.readFileSync( './certificates/cert.pem');
+const options = {
+  key: key,
+  cert: cert,
+};
+const app = express();
+
+//http.createServer(app).listen(8000);
+https.createServer(options, app).listen(8443);
 
 const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
-const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -25,7 +38,7 @@ app.use(function(req, res, next) {  // Enable cross origin resource sharing (for
     }
 });
 
-app.get("/user", (req, res, next) => {
+app.get("/user/", (req, res, next) => {
   let resultArray = [];
   mongo.connect(url, { useNewUrlParser: true }, (err, client) => {
     assert.equal(null, err);
@@ -43,7 +56,7 @@ app.get("/user", (req, res, next) => {
   });
 });
 
-app.post('/user', (req, res, next) => {
+app.post('/user/', (req, res, next) => {
   var body = req.body;
   var item = {
     username : body.name,
@@ -55,7 +68,7 @@ app.post('/user', (req, res, next) => {
   res.json({ message: body.cmtName });
 });
 
-app.put('/user', (req, res, next) => {
+app.put('/user/', (req, res, next) => {
   var body = req.body;
   var item = {
     username : body.name,
@@ -74,9 +87,6 @@ app.put('/user', (req, res, next) => {
   console.log('user', body.cmtName);  
   res.json({ resComments : body.resComments});
 
-});
-app.listen(8000, () => {
-    console.log("Listening on port : 8000");
 });
 
 function saveToDataBase (item) {
