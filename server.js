@@ -26,18 +26,19 @@ app.use(function(req, res, next) {  // Enable cross origin resource sharing (for
 });
 
 app.get("/user", (req, res, next) => {
-  let result = "";
+  let resultArray = [];
   mongo.connect(url, { useNewUrlParser: true }, (err, client) => {
     assert.equal(null, err);
     let db = client.db(dbName);
-    let cursor = db.collection('user-data').find({}, {limit: 1}).sort({$natural: -1});
+
+    let cursor = db.collection('user-data').find().sort({$natural: -1}).limit(10);
     cursor.forEach((doc, err) => {
       assert.equal(null, err);
-      result = doc;
+      resultArray.push(doc);
     }, () => {
-          client.close();
-          console.log(result);
-          res.json({message: result});
+      client.close();
+      console.log(resultArray);
+      res.json({message: resultArray});
     });
   });
 });
@@ -46,16 +47,34 @@ app.post('/user', (req, res, next) => {
   var body = req.body;
   var item = {
     username : body.name,
-    date : new Date(),
-    email : body.email,
-    phone : body.phone
+    date : body.date,
+    cmtName : body.cmtName
   };
   saveToDataBase(item);
-  console.log('user', body.name);  
-  res.json({ message: body.name });
+  console.log('user', body.cmtName);  
+  res.json({ message: body.cmtName });
 });
 
+app.put('/user', (req, res, next) => {
+  var body = req.body;
+  var item = {
+    username : body.name,
+    date : body.date,
+    cmtName : body.cmtName
+  };
+  var newItem = {
+    username : body.name,
+    date : body.date,
+    cmtName : body.cmtName,
+    resComments: body.resComments
 
+  };
+  console.log('resComments', newItem);  
+  updateDataBase(item, newItem);
+  console.log('user', body.cmtName);  
+  res.json({ resComments : body.resComments});
+
+});
 app.listen(8000, () => {
     console.log("Listening on port : 8000");
 });
@@ -67,6 +86,20 @@ function saveToDataBase (item) {
     db.collection('user-data').insertOne(item, (err, client) => {
       assert.equal(null, err);
       console.log('Item inserted');
+    });
+    client.close();
+  });
+}
+
+function updateDataBase (item, newItem) {
+  mongo.connect(url, { useNewUrlParser: true }, (err, client) => {
+    assert.equal(null, err);
+    let db = client.db(dbName);
+    db.collection('user-data').findOneAndUpdate(item, {$set :newItem}, {new: true, upsert: true}, (err, doc) => {
+      assert.equal(null, err);
+      console.log('Item updated');
+      console.log(doc);
+      console.log(newItem);
     });
     client.close();
   });
